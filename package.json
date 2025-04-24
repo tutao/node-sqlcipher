@@ -24,9 +24,7 @@
     "dist/index.cjs",
     "dist/index.mjs",
     "dist/lib/index.d.ts",
-    "prebuilds",
-    "!prebuilds/**/*.sym",
-    "README.md"
+    "lib/**",
   ],
   "dependencies": {
     "node-addon-api": "*",
@@ -47,7 +45,8 @@
     "lint": "run-p --print-label check:eslint check:format",
     "check:eslint": "eslint --cache .",
     "check:format": "prettier --cache --check .",
-    "prepare": "run-s build"
+    "prepare": "run-s build",
+    "install": "echo node-sqlcipher has been installed but 'node-gyp rebuild' has not been run."
   },
   "keywords": [
     "sqlite",
