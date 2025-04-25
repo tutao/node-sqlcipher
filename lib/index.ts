@@ -4,8 +4,8 @@
 import assert from 'node:assert';
 import { runInThisContext } from 'node:vm';
 import { fileURLToPath } from 'node:url';
-import { join } from 'node:path';
-import bindings from 'node-gyp-build';
+import { join, dirname } from 'node:path';
+import { loadBindings } from './loadBindings.js';
 
 /** @internal */
 type NativeDatabase = Readonly<{ __native_db: never }>;
@@ -13,14 +13,14 @@ type NativeDatabase = Readonly<{ __native_db: never }>;
 /** @internal */
 type NativeStatement = Readonly<{ __native_stmt: never }>;
 
-// esbuild is configured to replace:
-// - `import.meta.url` => `undefined` for CJS
-// - `__dirname` => `undefined` for ESM
-const ROOT_DIR = import.meta.url
-  ? fileURLToPath(new URL('..', import.meta.url))
-  : join(__dirname, '..');
+export type RunResult = {
+  /** Total number of affected rows */
+  changes: number;
+  /** Rowid of the last inserted row */
+  lastInsertRowid: number;
+};
 
-const addon = bindings<{
+const addon = loadBindings<{
   statementNew(
     db: NativeDatabase,
     query: string,
@@ -47,14 +47,7 @@ const addon = bindings<{
   databaseClose(db: NativeDatabase): void;
 
   signalTokenize(value: string): Array<string>;
-}>(ROOT_DIR);
-
-export type RunResult = {
-  /** Total number of affected rows */
-  changes: number;
-  /** Rowid of the last inserted row */
-  lastInsertRowid: number;
-};
+}>(import.meta.url, 'node_sqlcipher');
 
 export type StatementOptions = Readonly<{
   /**

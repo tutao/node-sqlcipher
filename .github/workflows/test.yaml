@@ -35,8 +35,8 @@ jobs:
         uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version-file: '.nvmrc'
-          cache: 'pnpm'
-          cache-dependency-path: 'pnpm-lock.yaml'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.yaml'
 
       - name: Setup sccache
         uses: mozilla-actions/sccache-action@65101d47ea8028ed0c98a1cdea8dd9182e9b5133 # v0.0.8
@@ -44,7 +44,7 @@ jobs:
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: ${{ env.SCCACHE_PATH }}
-          key: sccache-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'patches/**', 'deps/extension/Cargo.lock') }}
+          key: sccache-${{ runner.os }}-${{ hashFiles('package-lock.yaml', 'patches/**', 'deps/extension/Cargo.lock') }}
 
       - name: Restore cargo cache
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
