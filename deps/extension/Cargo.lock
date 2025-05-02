@@ -469,7 +469,7 @@ dependencies = [
 [[package]]
 name = "signal-tokenizer"
 version = "0.2.1"
-source = "git+https://github.com/signalapp/Signal-FTS5-Extension#a2a00359b1c0987e9b167855ebf0cd93342fd26e"
+source = "git+https://github.com/tutao/Signal-FTS5-Extension.git?rev=7b1b404b0f8ce97a9637a8c2f9385cd1655a2608#7b1b404b0f8ce97a9637a8c2f9385cd1655a2608"
 dependencies = [
  "libc",
  "unicode-normalization",

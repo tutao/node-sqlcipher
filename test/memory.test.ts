@@ -1,4 +1,4 @@
-import { describe, expect, test, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 import Database from '../lib/index.js';
 
@@ -25,17 +25,37 @@ beforeEach(() => {
   db = new Database();
 
   db.exec(`
-    CREATE TABLE t (a INTEGER, b TEXT, c BLOB);
+      CREATE TABLE t
+      (
+          a INTEGER,
+          b TEXT,
+          c BLOB
+      );
 
-    INSERT INTO t (a, b, c) VALUES
-      (1, '123', x'abba'),
-      (2, '456', x'dada'),
-      (3, '789', NULL);
+      INSERT INTO t (a, b, c)
+      VALUES (1, '123', x'abba'),
+             (2, '456', x'dada'),
+             (3, '789', NULL);
   `);
 });
 
 afterEach(() => {
   db.close();
+});
+
+test('fts tokenizer', () => {
+  db.initTokenizer();
+  db.exec(`CREATE VIRTUAL TABLE fts_t using fts5(text);`);
+  db.prepare(
+    `INSERT INTO fts_t(text)
+              VALUES (?)`,
+  ).run(['i am smol squishy text']);
+
+  expect(db.prepare(
+    `SELECT *
+              FROM fts_t
+              WHERE fts_t = ?`,
+  ).all(['i am smol squishy text'])).toEqual([{text: 'i am smol squishy text'}]);
 });
 
 test('db.close', () => {
@@ -73,7 +93,12 @@ test('statement.run', () => {
   });
 
   expect(
-    db.prepare(`INSERT INTO t (a, b, c) VALUES (4, '4', NULL)`).run(),
+    db
+      .prepare(
+        `INSERT INTO t (a, b, c)
+                VALUES (4, '4', NULL)`,
+      )
+      .run(),
   ).toEqual({
     changes: 1,
     lastInsertRowid: 4,
@@ -170,7 +195,8 @@ test('persistent statement recompilation', () => {
   const stmt = db.prepare('SELECT * FROM t', { persistent: true });
   expect(stmt.get()).toEqual(rows[0]);
 
-  db.exec(`ALTER TABLE t ADD COLUMN d TEXT DEFAULT 'hello'`);
+  db.exec(`ALTER TABLE t
+      ADD COLUMN d TEXT DEFAULT 'hello'`);
 
   expect(stmt.get()).toEqual({
     a: 1,
@@ -298,7 +324,10 @@ test('invalid pragma query', () => {
 describe('transaction', () => {
   test('commit', () => {
     db.transaction(() => {
-      db.prepare(`INSERT INTO t (a, b) VALUES (42, 'success')`).run();
+      db.prepare(
+        `INSERT INTO t (a, b)
+                  VALUES (42, 'success')`,
+      ).run();
     })();
 
     expect(
@@ -307,11 +336,18 @@ describe('transaction', () => {
   });
 
   test('rollback', () => {
-    db.prepare(`INSERT INTO t (a, b) VALUES (42, 'success')`).run();
+    db.prepare(
+      `INSERT INTO t (a, b)
+                VALUES (42, 'success')`,
+    ).run();
 
     expect(() =>
       db.transaction(() => {
-        db.prepare(`UPDATE t SET b = 'fail' WHERE A is 42`).run();
+        db.prepare(
+          `UPDATE t
+                    SET b = 'fail'
+                    WHERE A is 42`,
+        ).run();
         throw new Error('rollback');
       })(),
     ).toThrowError('rollback');
@@ -323,11 +359,18 @@ describe('transaction', () => {
 
   test('nested rollback', () => {
     db.transaction(() => {
-      db.prepare(`INSERT INTO t (a, b) VALUES (42, 'success')`).run();
+      db.prepare(
+        `INSERT INTO t (a, b)
+                  VALUES (42, 'success')`,
+      ).run();
 
       expect(() =>
         db.transaction(() => {
-          db.prepare(`UPDATE t SET b = 'fail' WHERE A is 42`).run();
+          db.prepare(
+            `UPDATE t
+                      SET b = 'fail'
+                      WHERE A is 42`,
+          ).run();
           throw new Error('rollback');
         })(),
       ).toThrowError('rollback');
@@ -341,11 +384,20 @@ describe('transaction', () => {
 
 test('single-copy strings', () => {
   db.exec(`
-    DROP TABLE t;
+      DROP TABLE t;
 
-    CREATE TABLE t (rowid INTEGER PRIMARY KEY NOT NULL, value TEXT NOT NULL);
+      CREATE TABLE t
+      (
+          rowid INTEGER PRIMARY KEY NOT NULL,
+          value TEXT                NOT NULL
+      );
 
-    INSERT INTO t (value) VALUES ('0a'), ('0a'), ('0a'), ('0a'), ('0a');
+      INSERT INTO t (value)
+      VALUES ('0a'),
+             ('0a'),
+             ('0a'),
+             ('0a'),
+             ('0a');
   `);
 
   expect(
@@ -360,9 +412,11 @@ test('single-copy strings', () => {
 test('number mode', () => {
   db.exec(
     `
-    DELETE FROM t;
-    -- MAX_INT64
-    INSERT INTO t (a) VALUES (1152921504606846975);
+        DELETE
+        FROM t;
+        -- MAX_INT64
+        INSERT INTO t (a)
+        VALUES (1152921504606846975);
     `,
   );
 
@@ -373,14 +427,16 @@ test('number mode', () => {
 
 test('bigint mode', () => {
   db.exec(`
-    DELETE FROM t;
+      DELETE
+      FROM t;
   `);
 
   const n = 0x7fff_ffff_ffff_ffffn;
 
   db.prepare(
     `
-    INSERT INTO t (a) VALUES (?);
+        INSERT INTO t (a)
+        VALUES (?);
     `,
     { bigint: true },
   ).run([n]);
@@ -406,6 +462,10 @@ test('signalTokenize', () => {
   expect(db.signalTokenize('a b c')).toEqual(['a', 'b', 'c']);
 });
 
+test('signalTokenize dot', () => {
+  expect(db.signalTokenize('a.b.c')).toEqual(['a', 'b', 'c']);
+});
+
 test('invalid argument for signalTokenize', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   expect(() => db.signalTokenize(123 as any)).toThrowError('Invalid value');
@@ -421,12 +481,17 @@ describe('statement cache', () => {
     cachedDb = new Database(':memory:', { cacheStatements: true });
 
     cachedDb.exec(`
-      CREATE TABLE t (a INTEGER, b TEXT, c BLOB);
+        CREATE TABLE t
+        (
+            a INTEGER,
+            b TEXT,
+            c BLOB
+        );
 
-      INSERT INTO t (a, b, c) VALUES
-        (1, '123', x'abba'),
-        (2, '456', x'dada'),
-        (3, '789', NULL);
+        INSERT INTO t (a, b, c)
+        VALUES (1, '123', x'abba'),
+               (2, '456', x'dada'),
+               (3, '789', NULL);
     `);
   });
 

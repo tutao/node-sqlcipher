@@ -24,7 +24,8 @@ hmac = "0.12.1"
 pbkdf2 = "0.12.2"
 rand_core = { version = "0.6.4", "default-features" = false, features = ["getrandom"] }
 sha2 = { version = "0.10.8", "default-features" = false }
-signal-tokenizer = { git = "https://github.com/signalapp/Signal-FTS5-Extension" }
+# Fork of signal-tokenizer with more precise splitting
+signal-tokenizer = { git = "https://github.com/tutao/Signal-FTS5-Extension.git", rev = "7b1b404b0f8ce97a9637a8c2f9385cd1655a2608" }
 
 [build-dependencies]
 cbindgen = "0.27.0"
