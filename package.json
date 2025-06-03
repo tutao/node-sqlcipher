@@ -36,7 +36,7 @@
     "lint": "run-p --print-label check:eslint check:format",
     "check:eslint": "eslint --cache .",
     "check:format": "prettier --cache --check .",
-    "prepare": "run-s build",
+    "prepare": "echo I AM PREPARE AND I WILL FAIL && exit 1",
     "install": "echo node-sqlcipher has been installed but 'node-gyp rebuild' has not been run."
   },
   "keywords": [
