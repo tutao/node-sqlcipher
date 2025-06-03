@@ -36,8 +36,8 @@
     "lint": "run-p --print-label check:eslint check:format",
     "check:eslint": "eslint --cache .",
     "check:format": "prettier --cache --check .",
-    "prepare": "run-s build",
-    "install": "echo sqlcipher is at $PWD && echo node-sqlcipher has been installed but 'node-gyp rebuild' has not been run."
+    "prepare": "echo sqlcipher prepare is at $PWD && run-s build",
+    "install": "echo sqlcipher install is at $PWD && echo node-sqlcipher has been installed but 'node-gyp rebuild' has not been run."
   },
   "keywords": [
     "sqlite",
