@@ -26,7 +26,7 @@
   "scripts": {
     "watch": "tsc --watch",
     "build": "run-p --print-label build:ts build:esm",
-    "build:ts": "echo build-ts fails now && exit 1",
+    "build:ts": "tsc",
     "build:esm": "esbuild --bundle --platform=node --target=node20 --format=esm lib/index.ts --outfile=dist/index.mjs",
     "build:docs": "typedoc lib/index.ts --includeVersion",
     "test": "vitest --coverage --pool threads",
@@ -36,8 +36,8 @@
     "lint": "run-p --print-label check:eslint check:format",
     "check:eslint": "eslint --cache .",
     "check:format": "prettier --cache --check .",
-    "prepare": "echo I AM PREPARE AND I WILL FAIL && exit 0",
-    "install": "echo node-sqlcipher has been installed but 'node-gyp rebuild' has not been run."
+    "prepare": "run-s build",
+    "install": "echo sqlcipher is at $PWD && echo node-sqlcipher has been installed but 'node-gyp rebuild' has not been run."
   },
   "keywords": [
     "sqlite",
