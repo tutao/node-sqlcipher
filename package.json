@@ -26,7 +26,7 @@
   "scripts": {
     "watch": "tsc --watch",
     "build": "run-p --print-label build:ts build:esm",
-    "build:ts": "tsc",
+    "build:ts": "tsc --explainFiles",
     "build:esm": "esbuild --bundle --platform=node --target=node20 --format=esm lib/index.ts --outfile=dist/index.mjs",
     "build:docs": "typedoc lib/index.ts --includeVersion",
     "test": "vitest --coverage --pool threads",
