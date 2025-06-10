@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <list>
+#include <memory>
 
 #include "addon.h"
 
@@ -56,18 +57,26 @@ static Napi::Value SignalTokenize(const Napi::CallbackInfo& info) {
 
   auto utf8 = value.Utf8Value();
 
-  std::vector<std::string> tokens;
-  int status =
-      signal_fts5_tokenize(nullptr, reinterpret_cast<void*>(&tokens), 0,
-                           utf8.c_str(), utf8.length(), SignalTokenizeCallback);
-  if (status != SQLITE_OK) {
-    NAPI_THROW(Napi::Error::New(env, "Failed to tokenize"), Napi::Value());
-  }
+  // Changed to use our own wrapper, as we do not want to normalize the result
+  // See https://github.com/tutao/tutanota/issues/9090
 
-  auto result = Napi::Array::New(env, tokens.size());
-  int i = 0;
-  for (auto& str : tokens) {
-    result[i++] = str.c_str();
+  // First, we tokenize the input and store it into a smart pointer so it can be freed when it goes out of scope.
+  std::unique_ptr<Tokenized, decltype(&signal_tokenize_free)> tokenized(
+    // tokenize `utf8.c_str()`, which is the `const char*` of `utf8` (which is std::string)
+    signal_tokenize(utf8.c_str()),
+
+    // calls `signal_tokenize_free()` when `tokenized` goes out of scope
+    &signal_tokenize_free
+  );
+
+  // Get the number of tokens.
+  std::size_t token_count = signal_tokenize_count(tokenized.get());
+
+  // Lastly, we pass the result into Napi.
+  auto result = Napi::Array::New(env, token_count);
+  const char* const* tokens = signal_tokenize_from_ptr(tokenized.get());
+  for(std::size_t i = 0; i < token_count; i++) {
+    result[i] = tokens[i];
   }
 
   return result;
