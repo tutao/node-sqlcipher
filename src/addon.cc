@@ -37,18 +37,6 @@ fts5_tokenizer SignalTokenizerModule::api_object = {
     signal_fts5_tokenize,
 };
 
-static int SignalTokenizeCallback(void* tokens_ptr,
-                                  int _flags,
-                                  char const* token,
-                                  int len,
-                                  int _start,
-                                  int _end) {
-  std::vector<std::string>* tokens =
-      reinterpret_cast<std::vector<std::string>*>(tokens_ptr);
-  tokens->push_back(std::string(token, len));
-  return SQLITE_OK;
-}
-
 static Napi::Value SignalTokenize(const Napi::CallbackInfo& info) {
   auto env = info.Env();
 
