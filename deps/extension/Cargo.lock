@@ -493,7 +493,7 @@ dependencies = [
 [[package]]
 name = "signal-tokenizer"
 version = "0.2.1"
-source = "git+https://github.com/tutao/Signal-FTS5-Extension.git?rev=26db985842494f848448e7ce9fb95107578cf479#26db985842494f848448e7ce9fb95107578cf479"
+source = "git+https://github.com/tutao/Signal-FTS5-Extension.git?rev=200f65e9a5111c8f7b19fd884f4c942b61a1579b#200f65e9a5111c8f7b19fd884f4c942b61a1579b"
 dependencies = [
  "bitflags",
  "cfg-if",

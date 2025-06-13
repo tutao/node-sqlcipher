@@ -25,7 +25,7 @@ pbkdf2 = "0.12.2"
 rand_core = { version = "0.6.4", "default-features" = false, features = ["getrandom"] }
 sha2 = { version = "0.10.8", "default-features" = false }
 # Fork of signal-tokenizer with more precise splitting
-signal-tokenizer = { git = "https://github.com/tutao/Signal-FTS5-Extension.git", rev = "26db985842494f848448e7ce9fb95107578cf479" }
+signal-tokenizer = { git = "https://github.com/tutao/Signal-FTS5-Extension.git", rev = "200f65e9a5111c8f7b19fd884f4c942b61a1579b" }
 
 [build-dependencies]
 cbindgen = "=0.28.0"
